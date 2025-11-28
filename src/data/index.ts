@@ -3,7 +3,11 @@
  */
 
 export {
-    mockPosts as default, getMockPostById, getMockPosts, getMockPostsByUser,
+    mockPosts,
+    mockPosts as default,
+    getMockPostById,
+    getMockPosts,
+    getMockPostsByUser,
     mockDataStats
 } from './mockPosts';
 

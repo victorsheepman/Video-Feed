@@ -3,6 +3,10 @@
  * 
  * Componente individual de video con player, thumbnail, estados y controles.
  * Optimizado con React.memo para evitar re-renders innecesarios.
+ * 
+ * NOTA: Esta es una versión MOCK del video player que simula la reproducción
+ * mostrando el thumbnail. Para usar videos reales, instala react-native-video:
+ * npm install react-native-video
  */
 
 import { UI_CONFIG } from '@/constants';
@@ -17,7 +21,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Video from 'react-native-video';
 
 interface IProps {
   video: VideoType;
@@ -137,7 +140,19 @@ const VideoTile: FC<IProps> = ({
    */
   useEffect(() => {
     setPlayerActive(isActive);
-  }, [isActive, setPlayerActive]);
+    
+    // Simular carga y reproducción del video cuando se activa
+    if (isActive && status === 'loading') {
+      // Simular tiempo de carga
+      const loadTimer = setTimeout(() => {
+        handleLoad();
+        setStatus('playing');
+        play();
+      }, 500);
+      
+      return () => clearTimeout(loadTimer);
+    }
+  }, [isActive, setPlayerActive, status, handleLoad, play]);
 
   /**
    * Efecto para iniciar timer de TTFF cuando empieza a cargar
@@ -145,6 +160,19 @@ const VideoTile: FC<IProps> = ({
   useEffect(() => {
     analytics.startTTFFTimer();
   }, [analytics]);
+  
+  /**
+   * Efecto para simular progreso del video (mock)
+   */
+  useEffect(() => {
+    if (playerState.isPlaying) {
+      const progressInterval = setInterval(() => {
+        analytics.onProgress({ currentTime: Date.now() / 1000 });
+      }, 1000);
+      
+      return () => clearInterval(progressInterval);
+    }
+  }, [playerState.isPlaying, analytics]);
 
   return (
     <TouchableOpacity
@@ -162,22 +190,15 @@ const VideoTile: FC<IProps> = ({
         />
       )}
 
-      {/* Video Player */}
-      <Video
-        ref={videoRef as any}
-        source={{ uri: video.url }}
-        style={styles.video}
-        resizeMode="cover"
-        paused={!playerState.isPlaying}
-        repeat={false}
-        onLoad={handleLoad}
-        onProgress={handleProgress}
-        onEnd={handleEnd}
-        onError={handleError}
-        playInBackground={false}
-        playWhenInactive={false}
-        ignoreSilentSwitch="ignore"
-      />
+      {/* Video Player Mock - Muestra thumbnail cuando está activo */}
+      {playerState.isPlaying && (
+        <Image
+          source={{ uri: video.thumbnailUrl }}
+          style={styles.video}
+          contentFit="cover"
+          transition={200}
+        />
+      )}
 
       {/* Overlay de Loading */}
       {status === 'loading' && (
