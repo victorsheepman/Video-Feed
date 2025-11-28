@@ -5,17 +5,17 @@
  * Incluye header con info del usuario, carrusel de videos, caption y métricas.
  */
 
+import { Post } from '@/types';
+import { Image } from 'expo-image';
 import React, { memo, useCallback } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
+    Dimensions,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { Image } from 'expo-image';
 import VideoCarousel from '../video/VideoCarousel';
-import { Post } from '@/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
