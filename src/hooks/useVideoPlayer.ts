@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * Interfaz para las referencias del componente Video de react-native-video
  * Define los métodos que necesitamos del player
  */
-interface VideoPlayerRef {
+type VideoPlayerRef = {
   seek: (time: number) => void;
   presentFullscreenPlayer?: () => void;
   dismissFullscreenPlayer?: () => void;
@@ -29,7 +29,7 @@ const activeVideoRefs = new Map<string, VideoPlayerRef | null>();
  */
 let currentActiveVideoId: string | null = null;
 
-interface UseVideoPlayerProps {
+interface IProps {
   videoId: string;
   postId: string;
   autoplay?: boolean;
@@ -38,15 +38,6 @@ interface UseVideoPlayerProps {
   onError?: (error: string) => void;
 }
 
-interface UseVideoPlayerReturn {
-  videoRef: React.RefObject<VideoPlayerRef | null>;
-  playerState: VideoPlayerState;
-  play: () => Promise<void>;
-  pause: () => Promise<void>;
-  seek: (time: number) => void;
-  isActive: boolean;
-  setIsActive: (active: boolean) => void;
-}
 
 /**
  * Hook para gestionar el estado y control de un video player individual
@@ -71,7 +62,7 @@ export const useVideoPlayer = ({
   onPlaybackStart,
   onPlaybackEnd,
   onError,
-}: UseVideoPlayerProps): UseVideoPlayerReturn => {
+}: IProps) => {
   // Referencia al componente Video
   const videoRef = useRef<VideoPlayerRef>(null);
 
@@ -220,20 +211,17 @@ export const useVideoPlayer = ({
   return {
     videoRef,
     playerState,
+    isActive,
     play,
     pause,
     seek,
-    isActive,
     setIsActive,
   };
 };
 
-/**
- * Obtiene el ID del video actualmente activo
- */
-export const getCurrentActiveVideoId = (): string | null => {
-  return currentActiveVideoId;
-};
+
+
+
 
 /**
  * Pausa todos los videos activos (útil para cuando la app va a background)
@@ -245,6 +233,7 @@ export const pauseAllVideos = (): void => {
   });
   currentActiveVideoId = null;
 };
+
 
 /**
  * Obtiene el conteo de videos actualmente registrados
