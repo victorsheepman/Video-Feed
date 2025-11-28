@@ -9,19 +9,11 @@ import { PREFETCH_CONFIG } from '@/constants';
 import { Post, Video } from '@/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-interface UsePrefetchProps {
+interface IProps {
   currentPostIndex: number;
   currentVideoIndex: number;
   posts: Post[];
   enabled?: boolean;
-}
-
-interface UsePrefetchReturn {
-  prefetchNextPost: () => void;
-  prefetchNextVideo: () => void;
-  prefetchPreviousPost: () => void;
-  isPrefetching: boolean;
-  prefetchedUrls: Set<string>;
 }
 
 /**
@@ -119,7 +111,7 @@ export const usePrefetch = ({
   currentVideoIndex,
   posts,
   enabled = PREFETCH_CONFIG.enabled,
-}: UsePrefetchProps): UsePrefetchReturn => {
+}: IProps) => {
   // Estado local de URLs prefetched
   const [prefetchedUrls, setPrefetchedUrls] = useState<Set<string>>(new Set());
   const [isPrefetching, setIsPrefetching] = useState(false);
@@ -248,11 +240,11 @@ export const usePrefetch = ({
   }, []);
 
   return {
-    prefetchNextPost,
-    prefetchNextVideo,
-    prefetchPreviousPost,
     isPrefetching,
     prefetchedUrls,
+    prefetchNextPost,
+    prefetchNextVideo,
+    prefetchPreviousPost
   };
 };
 
@@ -265,7 +257,7 @@ export const useAutoPrefetch = ({
   currentVideoIndex,
   posts,
   enabled = PREFETCH_CONFIG.enabled,
-}: UsePrefetchProps) => {
+}: IProps) => {
   const prefetch = usePrefetch({
     currentPostIndex,
     currentVideoIndex,

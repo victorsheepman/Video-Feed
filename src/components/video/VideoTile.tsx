@@ -9,17 +9,17 @@ import { UI_CONFIG } from '@/constants';
 import { useAutoAnalytics, useVideoPlayer } from '@/hooks';
 import { Video as VideoType } from '@/types';
 import { Image } from 'expo-image';
-import React, { memo, useCallback, useState } from 'react';
+import React, { type FC, memo, useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Video from 'react-native-video';
 
-interface VideoTileProps {
+interface IProps {
   video: VideoType;
   postId: string;
   isActive: boolean;
@@ -46,7 +46,7 @@ type PlayerStatus = 'loading' | 'ready' | 'playing' | 'paused' | 'error';
  * @param isActive - Si este video está visible y debe reproducirse
  * @param onError - Callback para errores
  */
-const VideoTile: React.FC<VideoTileProps> = ({
+const VideoTile: FC<IProps> = ({
   video,
   postId,
   isActive,
@@ -135,14 +135,14 @@ const VideoTile: React.FC<VideoTileProps> = ({
   /**
    * Efecto para sincronizar estado activo con el player
    */
-  React.useEffect(() => {
+  useEffect(() => {
     setPlayerActive(isActive);
   }, [isActive, setPlayerActive]);
 
   /**
    * Efecto para iniciar timer de TTFF cuando empieza a cargar
    */
-  React.useEffect(() => {
+  useEffect(() => {
     analytics.startTTFFTimer();
   }, [analytics]);
 

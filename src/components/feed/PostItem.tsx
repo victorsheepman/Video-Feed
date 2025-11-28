@@ -7,19 +7,19 @@
 
 import { Post } from '@/types';
 import { Image } from 'expo-image';
-import React, { memo, useCallback } from 'react';
+import React, { type FC, memo, useCallback } from 'react';
 import {
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import VideoCarousel from '../video/VideoCarousel';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-interface PostItemProps {
+interface IProps {
   post: Post;
   isActive: boolean;
   onVideoChange?: (videoIndex: number) => void;
@@ -40,7 +40,7 @@ interface PostItemProps {
  * @param onVideoChange - Callback cuando cambia el video activo
  * @param onUserPress - Callback cuando se presiona el usuario
  */
-const PostItem: React.FC<PostItemProps> = ({
+const PostItem: FC<IProps> = ({
   post,
   isActive,
   onVideoChange,
@@ -76,6 +76,7 @@ const PostItem: React.FC<PostItemProps> = ({
    * Formatea números grandes (ej: 1.2K, 5.3M)
    */
   const formatNumber = (num: number): string => {
+    
     if (num >= 1000000) {
       return `${(num / 1000000).toFixed(1)}M`;
     }
