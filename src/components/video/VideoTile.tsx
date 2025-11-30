@@ -1,13 +1,4 @@
-/**
- * VideoTile Component
- * 
- * Componente individual de video con player, thumbnail, estados y controles.
- * Optimizado con React.memo para evitar re-renders innecesarios.
- * 
- * NOTA: Esta es una versión MOCK del video player que simula la reproducción
- * mostrando el thumbnail. Para usar videos reales, instala react-native-video:
- * npm install react-native-video
- */
+
 
 import { UI_CONFIG } from '@/constants';
 import { useAutoAnalytics, useVideoPlayer } from '@/hooks';
@@ -30,50 +21,33 @@ interface IProps {
   onError?: (error: string) => void;
 }
 
-/**
- * Estados del video player
- */
+
 type PlayerStatus = 'loading' | 'ready' | 'playing' | 'paused' | 'error';
 
-/**
- * VideoTile - Tile individual de video con todos los estados
- * 
- * Características:
- * - Player de video con react-native-video
- * - Thumbnail mientras carga
- * - Estados: loading, ready, playing, paused, error
- * - Integración con hooks de analytics y player
- * - Optimizado con React.memo
- * 
- * @param video - Datos del video
- * @param postId - ID del post contenedor
- * @param isActive - Si este video está visible y debe reproducirse
- * @param onError - Callback para errores
- */
 const VideoTile: FC<IProps> = ({
   video,
   postId,
   isActive,
   onError,
 }) => {
-  // Estado del player
+  
   const [status, setStatus] = useState<PlayerStatus>('loading');
   const [showThumbnail, setShowThumbnail] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const hasStartedRef = useRef(false);
-  const prevActiveRef = useRef(isActive);
+  
   const videoPlayerRef = useRef<Video>(null);
 
-  // Hook de gestión del video player
+
   const {
-    videoRef,
+    
     playerState,
     play,
     pause,
     setIsActive: setPlayerActive,
   } = useVideoPlayer({
     videoId: video.id,
-    postId,
+    
     autoplay: true,
     onPlaybackStart: () => {
       setStatus('playing');
@@ -90,23 +64,18 @@ const VideoTile: FC<IProps> = ({
     },
   });
 
-  // Hook de analytics automático
+  
   const analytics = useAutoAnalytics({
     videoId: video.id,
     postId,
   });
 
-  /**
-   * Handler cuando el video se carga correctamente
-   */
   const handleLoad = useCallback(() => {
     setStatus('ready');
     analytics.onLoad();
   }, [analytics]);
 
-  /**
-   * Handler para tap en el video (play/pause manual)
-   */
+
   const handlePress = useCallback(() => {
     if (status === 'playing') {
       pause();
@@ -117,39 +86,31 @@ const VideoTile: FC<IProps> = ({
     }
   }, [status, play, pause]);
 
-  /**
-   * Handler de progreso del video
-   */
+ 
   const handleProgress = useCallback((data: any) => {
     analytics.onProgress(data);
   }, [analytics]);
 
-  /**
-   * Handler cuando el video termina
-   */
+  
   const handleEnd = useCallback(() => {
     analytics.onEnd();
     setStatus('paused');
   }, [analytics]);
 
-  /**
-   * Handler de errores del video
-   */
+ 
   const handleError = useCallback((error: any) => {
     analytics.onError(error);
     setStatus('error');
   }, [analytics]);
 
-  /**
-   * Efecto único para sincronizar estado activo y carga inicial
-   */
+  
   useEffect(() => {
     console.log(`🔄 [${video.id}] isActive cambió a: ${isActive}, playerState.isPlaying: ${playerState.isPlaying}`);
     
-    // Actualizar estado activo en el player
+   
     setPlayerActive(isActive);
     
-    // Cargar solo una vez cuando se activa por primera vez
+ 
     if (isActive && !hasStartedRef.current) {
       hasStartedRef.current = true;
       const loadTimer = setTimeout(() => {
@@ -162,12 +123,9 @@ const VideoTile: FC<IProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive]);
 
-  /**
-   * Efecto para sincronizar thumbnail con estado de reproducción
-   */
   useEffect(() => {
     if (playerState.isPlaying && status !== 'loading' && isVideoLoaded) {
-      // Ocultar thumbnail después de que el video empiece a reproducir
+   
       const timer = setTimeout(() => {
         setShowThumbnail(false);
       }, 500);
@@ -177,26 +135,19 @@ const VideoTile: FC<IProps> = ({
     }
   }, [playerState.isPlaying, isActive, status, isVideoLoaded]);
 
-  /**
-   * Efecto de cleanup cuando el componente se desmonta
-   */
   useEffect(() => {
     return () => {
-      // Limpiar estado cuando se desmonta
+      
       setIsVideoLoaded(false);
     };
   }, []);
 
-  /**
-   * Efecto para iniciar timer de TTFF cuando empieza a cargar
-   */
+    
   useEffect(() => {
     analytics.startTTFFTimer();
   }, [analytics]);
   
-  /**
-   * Efecto para simular progreso del video (mock)
-   */
+ 
   useEffect(() => {
     if (playerState.isPlaying) {
       const progressInterval = setInterval(() => {
@@ -207,10 +158,7 @@ const VideoTile: FC<IProps> = ({
     }
   }, [playerState.isPlaying, analytics]);
 
-  /**
-   * Efecto para controlar reproducción del video real
-   * SOLO se ejecuta cuando playerState.isPlaying cambia y el video está cargado
-   */
+
   useEffect(() => {
     const controlVideo = async () => {
       if (!videoPlayerRef.current || !isVideoLoaded) {
@@ -220,7 +168,7 @@ const VideoTile: FC<IProps> = ({
       try {
         const status = await videoPlayerRef.current.getStatusAsync();
         
-        // Solo actuar si el estado actual es diferente al deseado
+        
         if (status.isLoaded) {
           if (playerState.isPlaying && !status.isPlaying) {
             await videoPlayerRef.current.playAsync();
@@ -238,7 +186,7 @@ const VideoTile: FC<IProps> = ({
       }
     };
     
-    // Pequeño delay para evitar conflictos
+    
     const timer = setTimeout(controlVideo, 50);
     return () => clearTimeout(timer);
   }, [playerState.isPlaying, isVideoLoaded, video.id]);
@@ -249,7 +197,7 @@ const VideoTile: FC<IProps> = ({
       activeOpacity={0.9}
       onPress={handlePress}
     >
-      {/* Video Player Real - expo-av */}
+      
       <Video
         ref={videoPlayerRef}
         source={{ uri: video.url }}
@@ -280,7 +228,7 @@ const VideoTile: FC<IProps> = ({
         usePoster={true}
       />
 
-      {/* Thumbnail overlay (se muestra mientras carga) */}
+      
       {showThumbnail && (
         <View style={styles.loadingOverlay}>
           <Image
@@ -292,7 +240,7 @@ const VideoTile: FC<IProps> = ({
         </View>
       )}
 
-      {/* Overlay de Loading */}
+      
       {status === 'loading' && (
         <View style={styles.overlay}>
           <ActivityIndicator size="large" color="#fff" />
@@ -300,7 +248,7 @@ const VideoTile: FC<IProps> = ({
         </View>
       )}
 
-      {/* Overlay de Error */}
+      
       {status === 'error' && (
         <View style={[styles.overlay, styles.errorOverlay]}>
           <Text style={styles.errorIcon}>⚠️</Text>
@@ -314,14 +262,14 @@ const VideoTile: FC<IProps> = ({
         </View>
       )}
 
-      {/* Indicador de Pausa */}
+      
       {status === 'paused' && (
         <View style={styles.pauseIndicator}>
           <Text style={styles.pauseIcon}>▶️</Text>
         </View>
       )}
 
-      {/* Info del video (duración) */}
+      
       {video.duration && (
         <View style={styles.durationBadge}>
           <Text style={styles.durationText}>
@@ -333,9 +281,7 @@ const VideoTile: FC<IProps> = ({
   );
 };
 
-/**
- * Formatea la duración en milisegundos a formato MM:SS
- */
+  
 const formatDuration = (milliseconds: number): string => {
   const totalSeconds = Math.floor(milliseconds / 1000);
   const minutes = Math.floor(totalSeconds / 60);
@@ -433,8 +379,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// Memoización para evitar re-renders innecesarios
-// Solo re-renderiza si cambian video.id, postId o isActive
+
 export default memo(VideoTile, (prevProps, nextProps) => {
   return (
     prevProps.video.id === nextProps.video.id &&

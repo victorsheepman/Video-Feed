@@ -1,6 +1,3 @@
-/**
- * Video Types - Definiciones de tipos para videos y posts
- */
 
 export interface Video {
   id: string;

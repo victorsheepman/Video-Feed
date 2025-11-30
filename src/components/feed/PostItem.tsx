@@ -1,9 +1,4 @@
-/**
- * PostItem Component
- * 
- * Item completo de un post en el feed vertical.
- * Incluye header con info del usuario, carrusel de videos, caption y métricas.
- */
+
 
 import { Post } from '@/types';
 import { Image } from 'expo-image';
@@ -26,38 +21,21 @@ interface IProps {
   onUserPress?: (userId: string) => void;
 }
 
-/**
- * PostItem - Item completo del post en el feed vertical
- * 
- * Estructura:
- * - Header: Avatar, nombre del usuario, timestamp
- * - VideoCarousel: Carrusel horizontal de videos
- * - Caption: Texto del post
- * - Footer: Métricas (likes, comentarios)
- * 
- * @param post - Datos del post completo
- * @param isActive - Si el post está visible en el viewport
- * @param onVideoChange - Callback cuando cambia el video activo
- * @param onUserPress - Callback cuando se presiona el usuario
- */
+
 const PostItem: FC<IProps> = ({
   post,
   isActive,
   onVideoChange,
   onUserPress,
 }) => {
-  /**
-   * Handler para presionar el perfil del usuario
-   */
+  
   const handleUserPress = useCallback(() => {
     if (onUserPress) {
       onUserPress(post.author.id);
     }
   }, [post.author.id, onUserPress]);
 
-  /**
-   * Formatea el timestamp a formato relativo (ej: "2h ago")
-   */
+  
   const getTimeAgo = (timestamp: number): string => {
     const now = Date.now();
     const diff = now - timestamp;
@@ -72,9 +50,7 @@ const PostItem: FC<IProps> = ({
     return 'Just now';
   };
 
-  /**
-   * Formatea números grandes (ej: 1.2K, 5.3M)
-   */
+  
   const formatNumber = (num: number): string => {
     
     if (num >= 1000000) {
@@ -88,7 +64,7 @@ const PostItem: FC<IProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Header - User Info */}
+     
       <TouchableOpacity
         style={styles.header}
         onPress={handleUserPress}
@@ -109,7 +85,7 @@ const PostItem: FC<IProps> = ({
         </TouchableOpacity>
       </TouchableOpacity>
 
-      {/* Video Carousel */}
+     
       <VideoCarousel
         videos={post.videos}
         postId={post.id}
@@ -117,7 +93,7 @@ const PostItem: FC<IProps> = ({
         onVideoChange={onVideoChange}
       />
 
-      {/* Caption */}
+     
       {post.caption && (
         <View style={styles.captionContainer}>
           <Text style={styles.caption} numberOfLines={3}>
@@ -128,9 +104,9 @@ const PostItem: FC<IProps> = ({
         </View>
       )}
 
-      {/* Footer - Metrics */}
+     
       <View style={styles.footer}>
-        {/* Likes */}
+       
         <TouchableOpacity style={styles.metricButton}>
           <Text style={styles.metricIcon}>❤️</Text>
           <Text style={styles.metricText}>
@@ -138,7 +114,7 @@ const PostItem: FC<IProps> = ({
           </Text>
         </TouchableOpacity>
 
-        {/* Comments */}
+       
         <TouchableOpacity style={styles.metricButton}>
           <Text style={styles.metricIcon}>💬</Text>
           <Text style={styles.metricText}>
@@ -146,22 +122,20 @@ const PostItem: FC<IProps> = ({
           </Text>
         </TouchableOpacity>
 
-        {/* Share */}
+       
         <TouchableOpacity style={styles.metricButton}>
           <Text style={styles.metricIcon}>📤</Text>
           <Text style={styles.metricText}>Share</Text>
         </TouchableOpacity>
 
-        {/* Spacer */}
+
         <View style={styles.spacer} />
 
-        {/* Bookmark */}
         <TouchableOpacity style={styles.metricButton}>
           <Text style={styles.metricIcon}>🔖</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Divider */}
       <View style={styles.divider} />
     </View>
   );
@@ -245,8 +219,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// Memoización para evitar re-renders innecesarios
-// Solo re-renderiza si cambian post.id o isActive
+
 export default memo(PostItem, (prevProps, nextProps) => {
   return (
     prevProps.post.id === nextProps.post.id &&
