@@ -59,6 +59,7 @@ const VideoTile: FC<IProps> = ({
   // Estado del player
   const [status, setStatus] = useState<PlayerStatus>('loading');
   const [showThumbnail, setShowThumbnail] = useState(true);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const hasStartedRef = useRef(false);
   const prevActiveRef = useRef(isActive);
   const videoPlayerRef = useRef<Video>(null);
@@ -143,6 +144,8 @@ const VideoTile: FC<IProps> = ({
    * Efecto único para sincronizar estado activo y carga inicial
    */
   useEffect(() => {
+    console.log(`🔄 [${video.id}] isActive cambió a: ${isActive}, playerState.isPlaying: ${playerState.isPlaying}`);
+    
     // Actualizar estado activo en el player
     setPlayerActive(isActive);
     
@@ -163,7 +166,7 @@ const VideoTile: FC<IProps> = ({
    * Efecto para sincronizar thumbnail con estado de reproducción
    */
   useEffect(() => {
-    if (playerState.isPlaying && status !== 'loading') {
+    if (playerState.isPlaying && status !== 'loading' && isVideoLoaded) {
       // Ocultar thumbnail después de que el video empiece a reproducir
       const timer = setTimeout(() => {
         setShowThumbnail(false);
@@ -172,7 +175,17 @@ const VideoTile: FC<IProps> = ({
     } else if (!isActive && !playerState.isPlaying) {
       setShowThumbnail(true);
     }
-  }, [playerState.isPlaying, isActive, status]);
+  }, [playerState.isPlaying, isActive, status, isVideoLoaded]);
+
+  /**
+   * Efecto de cleanup cuando el componente se desmonta
+   */
+  useEffect(() => {
+    return () => {
+      // Limpiar estado cuando se desmonta
+      setIsVideoLoaded(false);
+    };
+  }, []);
 
   /**
    * Efecto para iniciar timer de TTFF cuando empieza a cargar
@@ -196,24 +209,39 @@ const VideoTile: FC<IProps> = ({
 
   /**
    * Efecto para controlar reproducción del video real
+   * SOLO se ejecuta cuando playerState.isPlaying cambia y el video está cargado
    */
   useEffect(() => {
     const controlVideo = async () => {
-      if (!videoPlayerRef.current) return;
+      if (!videoPlayerRef.current || !isVideoLoaded) {
+        return;
+      }
       
       try {
-        if (playerState.isPlaying) {
-          await videoPlayerRef.current.playAsync();
-        } else {
-          await videoPlayerRef.current.pauseAsync();
+        const status = await videoPlayerRef.current.getStatusAsync();
+        
+        // Solo actuar si el estado actual es diferente al deseado
+        if (status.isLoaded) {
+          if (playerState.isPlaying && !status.isPlaying) {
+            await videoPlayerRef.current.playAsync();
+            console.log(`▶️ Video started: ${video.id}`);
+          } else if (!playerState.isPlaying && status.isPlaying) {
+            await videoPlayerRef.current.pauseAsync();
+            console.log(`⏸️ Video paused: ${video.id}`);
+          }
         }
-      } catch (error) {
-        console.error(`Error controlling video ${video.id}:`, error);
+      } catch (error: any) {
+        const errorMsg = error?.message || String(error);
+        if (!errorMsg.includes('Invalid view') && !errorMsg.includes('null')) {
+          console.error(`Error controlling video ${video.id}:`, error);
+        }
       }
     };
     
-    controlVideo();
-  }, [playerState.isPlaying, video.id]);
+    // Pequeño delay para evitar conflictos
+    const timer = setTimeout(controlVideo, 50);
+    return () => clearTimeout(timer);
+  }, [playerState.isPlaying, isVideoLoaded, video.id]);
 
   return (
     <TouchableOpacity
@@ -231,6 +259,7 @@ const VideoTile: FC<IProps> = ({
         shouldPlay={false}
         onLoad={(status) => {
           console.log(`📹 Video loaded: ${video.id}`);
+          setIsVideoLoaded(true);
           handleLoad();
         }}
         onPlaybackStatusUpdate={(status) => {
@@ -244,6 +273,7 @@ const VideoTile: FC<IProps> = ({
         }}
         onError={(error) => {
           console.error(`❌ Video error ${video.id}:`, error);
+          setIsVideoLoaded(false);
           handleError(error);
         }}
         posterSource={{ uri: video.thumbnailUrl }}

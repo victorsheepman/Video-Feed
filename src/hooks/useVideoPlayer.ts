@@ -58,7 +58,6 @@ export const useVideoPlayer = ({
   
   const play = useCallback(async () => {
     try {
-      // Mock player - no necesita ref real
       pauseOtherVideos();
 
       currentActiveVideoId = videoId;
@@ -70,7 +69,7 @@ export const useVideoPlayer = ({
         onPlaybackStart();
       }
 
-      console.log(`▶️ Playing video: ${videoId}`);
+      console.log(`▶️ [${videoId}] Estado cambiado a PLAYING`);
     } catch (error) {
       console.error(`❌ Error playing video ${videoId}:`, error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -84,7 +83,6 @@ export const useVideoPlayer = ({
   
   const pause = useCallback(async () => {
     try {
-      // Mock player - no necesita ref real
       setPlayerState(prev => ({ ...prev, isPlaying: false }));
 
       
@@ -92,7 +90,7 @@ export const useVideoPlayer = ({
         currentActiveVideoId = null;
       }
 
-      console.log(`⏸️ Pausing video: ${videoId}`);
+      console.log(`⏸️ [${videoId}] Estado cambiado a PAUSED`);
     } catch (error) {
       console.error(`❌ Error pausing video ${videoId}:`, error);
     }
@@ -126,6 +124,7 @@ export const useVideoPlayer = ({
 
   
   const prevIsActiveRef = useRef(isActive);
+  const isControllingRef = useRef(false);
   
   useEffect(() => {
     const wasActive = prevIsActiveRef.current;
@@ -136,11 +135,29 @@ export const useVideoPlayer = ({
       return;
     }
     
-    if (isActive && autoplay && !playerState.isPlaying) {
-      play();
-    } else if (!isActive && playerState.isPlaying) {
-      pause();
+    // Prevenir múltiples llamadas simultáneas
+    if (isControllingRef.current) {
+      return;
     }
+    
+    const controlPlayback = async () => {
+      isControllingRef.current = true;
+      
+      try {
+        if (isActive && autoplay && !playerState.isPlaying) {
+          await play();
+        } else if (!isActive && playerState.isPlaying) {
+          await pause();
+        }
+      } finally {
+        // Liberar el lock después de un pequeño delay
+        setTimeout(() => {
+          isControllingRef.current = false;
+        }, 100);
+      }
+    };
+    
+    controlPlayback();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive]);
 
