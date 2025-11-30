@@ -49,7 +49,6 @@ src/
 ├── hooks/             # Custom hooks
 ├── services/          # Servicios y APIs
 │   └── mockData.ts    # Generación de datos de prueba
-├── store/             # Estado global (Zustand)
 ├── types/             # Definiciones TypeScript
 ├── utils/             # Utilidades
 │   ├── analytics.ts   # Sistema de logging
@@ -219,9 +218,7 @@ La aplicación ahora tiene un feed vertical completamente funcional con:
 
 2. **expo-image vs react-native-fast-image:** Se usa expo-image (ya incluido) en lugar de react-native-fast-image por compatibilidad con React 19.
 
-3. **Zustand vs Redux:** Zustand elegido por su simplicidad y menor overhead para este caso de uso.
-
-4. **TypeScript strict mode:** Activado para mejor type safety y detección temprana de errores.
+3. **TypeScript strict mode:** Activado para mejor type safety y detección temprana de errores.
 
 ### Limitaciones Actuales
 
