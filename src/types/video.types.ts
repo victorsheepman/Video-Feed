@@ -6,7 +6,7 @@ export interface Video {
   id: string;
   url: string;
   thumbnailUrl: string;
-  duration: number; // en milisegundos
+  duration: number; 
   title?: string;
   aspectRatio?: number;
 }

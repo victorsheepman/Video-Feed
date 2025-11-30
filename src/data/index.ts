@@ -3,11 +3,10 @@
  */
 
 export {
-    mockPosts,
     mockPosts as default,
     getMockPostById,
     getMockPosts,
     getMockPostsByUser,
-    mockDataStats
+    mockDataStats, mockPosts
 } from './mockPosts';
 
