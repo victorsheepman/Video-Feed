@@ -12,7 +12,7 @@
 import { UI_CONFIG } from '@/constants';
 import { useAutoAnalytics, useVideoPlayer } from '@/hooks';
 import { Video as VideoType } from '@/types';
-import { Video, ResizeMode } from 'expo-av';
+import { ResizeMode, Video } from 'expo-av';
 import { Image } from 'expo-image';
 import React, { type FC, memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
