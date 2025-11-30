@@ -4,43 +4,13 @@ Una aplicación React Native de alto rendimiento que implementa un feed vertical
 
 ## 📋 Tabla de Contenidos
 
-- [Características](#-características)
 - [Requisitos](#-requisitos)
 - [Instalación](#-instalación)
 - [Arquitectura](#-arquitectura)
 - [Estrategias de Performance](#-estrategias-de-performance)
 - [Configuración](#-configuración)
 - [Testing](#-testing)
-- [Estado del Proyecto](#-estado-del-proyecto)
 
-## ✨ Características
-
-### Implementadas
-
-✅ **Setup Inicial (Pasos 1-2)**
-- Estructura de carpetas organizada
-- Tipos TypeScript completos
-- Configuración de constantes y feature flags
-- Sistema de analytics
-- Utilidades de performance y retry logic
-- Generación de datos mock (200+ posts)
-
-✅ **Custom Hooks (Paso 3)**
-- `useVideoPlayer` - Control de reproducción centralizado
-- `usePrefetch` - Prefetching inteligente
-- `useAnalytics` - Sistema de eventos
-
-✅ **Componentes (Paso 4)**
-- `VideoTile` - Tile individual de video
-- `VideoCarousel` - Carrusel horizontal de videos
-- `PostItem` - Item completo del post con header, carrusel y footer
-
-✅ **Pantalla Principal (Paso 5)**
-- `VideoFeedScreen` - Feed vertical optimizado con FlatList
-- Detección de posts activos con viewability
-- Gestión de recursos de videos inactivos
-- Integración completa de hooks y componentes
-- Solo un video reproduce a la vez
 
 ## 🔧 Requisitos
 
@@ -116,7 +86,7 @@ src/
 
 #### 4. VideoPlayer
 - **Responsabilidad:** Reproducción de video individual
-- **Tecnología:** react-native-video
+- **Tecnología:** `expo-av` (el player oficial de Expo que reemplaza al anteriormente mencionado `react-native-video`)
 - **Características:**
   - Autoplay condicional
   - Manejo de errores
@@ -233,90 +203,6 @@ El sistema registra automáticamente:
   Metadata: {"ttff": 156}
 ```
 
-## 🔄 Estado del Proyecto
-
-### ✅ PASOS COMPLETADOS
-
-#### **Paso 1-2: Setup e Infraestructura**
-1. ✅ Instalación de dependencias
-   - react-native-video
-   - expo-image
-   - zustand
-   - babel-plugin-module-resolver
-
-2. ✅ Estructura de carpetas
-   - `/src` con subcarpetas organizadas
-   - Separación clara de responsabilidades
-
-3. ✅ Sistema de tipos TypeScript
-   - Tipos para Video, Post, Analytics
-   - Interfaces de configuración
-   - VideoPlayerState, PrefetchConfig
-
-4. ✅ Configuración y constantes
-   - Feature flags configurables
-   - URLs de videos de prueba (Google GTV, Blender)
-   - Configuración de performance
-
-5. ✅ Utilidades base
-   - Sistema de analytics con batching
-   - Monitor de performance (FPS tracking)
-   - Lógica de reintentos con backoff exponencial
-
-6. ✅ Servicio de datos mock
-   - Generación de 200 posts realistas
-   - 3-5 videos por post
-   - Métricas de engagement
-
-#### **Paso 3: Custom Hooks**
-1. ✅ `useVideoPlayer`
-   - Control centralizado de reproducción
-   - Pausa automática de otros videos
-   - Gestión de referencias y estado
-   - Autoplay condicional
-
-2. ✅ `usePrefetch`
-   - Prefetch del siguiente post
-   - Prefetch del siguiente video
-   - Queue de prefetch con límites
-   - Evita duplicados
-
-3. ✅ `useAnalytics`
-   - Logging de eventos de reproducción
-   - Timer automático para TTFF
-   - Integración con utils/analytics
-
-#### **Paso 4: Componentes**
-1. ✅ `VideoTile`
-   - Reproducción de video individual
-   - Controles de UI (play/pause, mute)
-   - Indicador de buffering
-   - Manejo de errores
-
-2. ✅ `VideoCarousel`
-   - Carrusel horizontal paginado
-   - Detección de video visible
-   - Solo reproduce el video activo
-   - Indicadores de paginación
-
-3. ✅ `PostItem`
-   - Header con avatar y usuario
-   - Integración del carrusel
-   - Caption y métricas (likes, comments)
-   - Footer con acciones
-
-#### **Paso 5: Pantalla Principal**
-1. ✅ `VideoFeedScreen`
-   - FlatList vertical optimizado
-   - `getItemLayout` para scroll rápido
-   - `initialNumToRender={3}`
-   - `windowSize={3}`
-   - `removeClippedSubviews` (Android)
-   - Viewability tracking (80% threshold)
-   - Pull to refresh
-   - Solo un video activo a la vez
-   - Integración completa de hooks y componentes
-
 ### 🎉 Aplicación Funcional
 
 La aplicación ahora tiene un feed vertical completamente funcional con:
@@ -326,25 +212,6 @@ La aplicación ahora tiene un feed vertical completamente funcional con:
 - ✅ Prefetching inteligente
 - ✅ Analytics integrado
 - ✅ Performance optimizado
-
-### 🚀 Próximos Pasos Sugeridos
-
-**Mejoras Futuras:**
-- [ ] Migrar a FlashList para mejor performance
-- [ ] Implementar navegación a perfiles
-- [ ] Agregar funcionalidad de likes y comentarios
-- [ ] Integrar con API backend real
-- [ ] Paginación infinita del feed
-- [ ] Cache de videos localmente
-- [ ] Soporte para modo offline
-- [ ] Tests unitarios y de integración
-- [ ] Tests de performance automatizados
-
-## 🐛 Issues Conocidos
-
-Ninguno por ahora - proyecto recién iniciado.
-
-## 📝 Notas de Desarrollo
 
 ### Decisiones de Arquitectura
 
@@ -371,17 +238,3 @@ Ninguno por ahora - proyecto recién iniciado.
 ## 👨‍💻 Autor
 
 Desarrollado como parte del challenge técnico: "High-Performance Video Feed"
-
-## 📖 Documentación Detallada
-
-Cada paso completado tiene su propia documentación detallada:
-
-- 📄 [PASO_2_COMPLETE.md](./PASO_2_COMPLETE.md) - Tipos y Constantes
-- 📄 [PASO_3_COMPLETE.md](./PASO_3_COMPLETE.md) - Custom Hooks
-- 📄 [PASO_4_COMPLETE.md](./PASO_4_COMPLETE.md) - Componentes
-- 📄 [PASO_5_COMPLETE.md](./PASO_5_COMPLETE.md) - Pantalla de Feed
-
----
-
-**Última actualización:** Noviembre 2025
-**Versión:** 1.0.0 (Pasos 1-5 completados - Aplicación funcional)
