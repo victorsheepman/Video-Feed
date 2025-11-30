@@ -1,5 +1,5 @@
 /**
- * Home Tab Screen - Muestra el feed principal de videos
+ * Home Screen - Muestra el feed principal de videos
  */
 
 import { VideoFeedScreen } from '@/screens';
