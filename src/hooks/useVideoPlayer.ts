@@ -58,12 +58,7 @@ export const useVideoPlayer = ({
   
   const play = useCallback(async () => {
     try {
-      if (!videoRef.current) {
-        console.warn(`⚠️ Video ref not available for ${videoId}`);
-        return;
-      }
-
-      
+      // Mock player - no necesita ref real
       pauseOtherVideos();
 
       currentActiveVideoId = videoId;
@@ -89,10 +84,7 @@ export const useVideoPlayer = ({
   
   const pause = useCallback(async () => {
     try {
-      if (!videoRef.current) {
-        return;
-      }
-
+      // Mock player - no necesita ref real
       setPlayerState(prev => ({ ...prev, isPlaying: false }));
 
       
@@ -108,11 +100,7 @@ export const useVideoPlayer = ({
 
   
   const seek = useCallback((time: number) => {
-    if (!videoRef.current) {
-      return;
-    }
-
-    videoRef.current.seek(time);
+    // Mock player - simular seek
     setPlayerState(prev => ({ ...prev, currentTime: time }));
     console.log(`⏭️ Seeking video ${videoId} to ${time}s`);
   }, [videoId]);
@@ -137,13 +125,24 @@ export const useVideoPlayer = ({
   }, [videoId]);
 
   
+  const prevIsActiveRef = useRef(isActive);
+  
   useEffect(() => {
-    if (isActive && autoplay) {
+    const wasActive = prevIsActiveRef.current;
+    prevIsActiveRef.current = isActive;
+    
+    // Solo actuar cuando cambia el estado activo
+    if (isActive === wasActive) {
+      return;
+    }
+    
+    if (isActive && autoplay && !playerState.isPlaying) {
       play();
     } else if (!isActive && playerState.isPlaying) {
       pause();
     }
-  }, [isActive, autoplay, play, pause, playerState.isPlaying]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
 
   
   useEffect(() => {

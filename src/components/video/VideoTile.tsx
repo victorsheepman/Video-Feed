@@ -12,8 +12,9 @@
 import { UI_CONFIG } from '@/constants';
 import { useAutoAnalytics, useVideoPlayer } from '@/hooks';
 import { Video as VideoType } from '@/types';
+import { Video, ResizeMode } from 'expo-av';
 import { Image } from 'expo-image';
-import React, { type FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { type FC, memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -58,6 +59,9 @@ const VideoTile: FC<IProps> = ({
   // Estado del player
   const [status, setStatus] = useState<PlayerStatus>('loading');
   const [showThumbnail, setShowThumbnail] = useState(true);
+  const hasStartedRef = useRef(false);
+  const prevActiveRef = useRef(isActive);
+  const videoPlayerRef = useRef<Video>(null);
 
   // Hook de gestión del video player
   const {
@@ -136,23 +140,39 @@ const VideoTile: FC<IProps> = ({
   }, [analytics]);
 
   /**
-   * Efecto para sincronizar estado activo con el player
+   * Efecto único para sincronizar estado activo y carga inicial
    */
   useEffect(() => {
+    // Actualizar estado activo en el player
     setPlayerActive(isActive);
     
-    // Simular carga y reproducción del video cuando se activa
-    if (isActive && status === 'loading') {
-      // Simular tiempo de carga
+    // Cargar solo una vez cuando se activa por primera vez
+    if (isActive && !hasStartedRef.current) {
+      hasStartedRef.current = true;
       const loadTimer = setTimeout(() => {
-        handleLoad();
-        setStatus('playing');
-        play();
-      }, 500);
+        setStatus('ready');
+        analytics.onLoad();
+      }, 300);
       
       return () => clearTimeout(loadTimer);
     }
-  }, [isActive, setPlayerActive, status, handleLoad, play]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
+
+  /**
+   * Efecto para sincronizar thumbnail con estado de reproducción
+   */
+  useEffect(() => {
+    if (playerState.isPlaying && status !== 'loading') {
+      // Ocultar thumbnail después de que el video empiece a reproducir
+      const timer = setTimeout(() => {
+        setShowThumbnail(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else if (!isActive && !playerState.isPlaying) {
+      setShowThumbnail(true);
+    }
+  }, [playerState.isPlaying, isActive, status]);
 
   /**
    * Efecto para iniciar timer de TTFF cuando empieza a cargar
@@ -174,30 +194,72 @@ const VideoTile: FC<IProps> = ({
     }
   }, [playerState.isPlaying, analytics]);
 
+  /**
+   * Efecto para controlar reproducción del video real
+   */
+  useEffect(() => {
+    const controlVideo = async () => {
+      if (!videoPlayerRef.current) return;
+      
+      try {
+        if (playerState.isPlaying) {
+          await videoPlayerRef.current.playAsync();
+        } else {
+          await videoPlayerRef.current.pauseAsync();
+        }
+      } catch (error) {
+        console.error(`Error controlling video ${video.id}:`, error);
+      }
+    };
+    
+    controlVideo();
+  }, [playerState.isPlaying, video.id]);
+
   return (
     <TouchableOpacity
       style={styles.container}
       activeOpacity={0.9}
       onPress={handlePress}
     >
-      {/* Thumbnail (se muestra mientras carga o en error) */}
-      {showThumbnail && (
-        <Image
-          source={{ uri: video.thumbnailUrl }}
-          style={styles.thumbnail}
-          contentFit="cover"
-          transition={200}
-        />
-      )}
+      {/* Video Player Real - expo-av */}
+      <Video
+        ref={videoPlayerRef}
+        source={{ uri: video.url }}
+        style={styles.video}
+        resizeMode={ResizeMode.COVER}
+        isLooping
+        shouldPlay={false}
+        onLoad={(status) => {
+          console.log(`📹 Video loaded: ${video.id}`);
+          handleLoad();
+        }}
+        onPlaybackStatusUpdate={(status) => {
+          if (status.isLoaded) {
+            handleProgress({ currentTime: (status.positionMillis || 0) / 1000 });
+            
+            if (status.didJustFinish) {
+              handleEnd();
+            }
+          }
+        }}
+        onError={(error) => {
+          console.error(`❌ Video error ${video.id}:`, error);
+          handleError(error);
+        }}
+        posterSource={{ uri: video.thumbnailUrl }}
+        usePoster={true}
+      />
 
-      {/* Video Player Mock - Muestra thumbnail cuando está activo */}
-      {playerState.isPlaying && (
-        <Image
-          source={{ uri: video.thumbnailUrl }}
-          style={styles.video}
-          contentFit="cover"
-          transition={200}
-        />
+      {/* Thumbnail overlay (se muestra mientras carga) */}
+      {showThumbnail && (
+        <View style={styles.loadingOverlay}>
+          <Image
+            source={{ uri: video.thumbnailUrl }}
+            style={styles.thumbnail}
+            contentFit="cover"
+            transition={200}
+          />
+        </View>
       )}
 
       {/* Overlay de Loading */}
@@ -269,6 +331,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
